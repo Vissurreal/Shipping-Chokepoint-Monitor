@@ -1,0 +1,127 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Seaborne Chokepoint Command Center</title>
+<meta name="description" content="Live command-center overview of maritime oil chokepoints — Hormuz, Bab el-Mandeb, Suez — with SPR, war-risk insurance, oil prices, and reroute pressure." />
+
+<!-- Leaflet (interactive map) from CDN -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="styles.css" />
+
+<div id="app">
+  <!-- ===== Top bar ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <h1>Seaborne Chokepoint <span>Command Center</span></h1>
+        <p class="brand-sub">Tankers · Oil · Maritime chokepoints — live operational picture</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock">
+        <div class="clock-time" id="clockTime">--:--:--</div>
+        <div class="clock-label">UTC</div>
+      </div>
+      <div class="health" id="healthChips" aria-label="Data source health"></div>
+      <div class="refresh">
+        <button id="refreshBtn" type="button" title="Refresh now">⟳ Refresh</button>
+        <div class="refresh-meta">
+          <span id="dataMode" class="mode-chip">—</span>
+          <span id="lastUpdated" class="last-updated">updating…</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Alert banner ===== -->
+  <section class="banner" id="banner" aria-live="polite">
+    <div class="banner-verdict">
+      <div class="banner-dot" id="bannerDot"></div>
+      <div class="banner-text">
+        <div class="banner-status" id="bannerStatus">Loading status…</div>
+        <div class="banner-detail" id="bannerDetail">Fetching live operational data.</div>
+      </div>
+    </div>
+    <div class="banner-meters" id="bannerMeters"></div>
+  </section>
+
+  <!-- ===== KPI stat tiles ===== -->
+  <section class="kpis" id="kpis" aria-label="Key indicators"></section>
+
+  <!-- ===== Map + chokepoint status ===== -->
+  <section class="main-grid">
+    <div class="panel map-panel">
+      <div class="panel-head">
+        <h2>Chokepoint Map</h2>
+        <div class="map-legend" id="mapLegend">
+          <span><i class="lg lg-good"></i>Near normal</span>
+          <span><i class="lg lg-warning"></i>Elevated</span>
+          <span><i class="lg lg-serious"></i>Restricted</span>
+          <span><i class="lg lg-critical"></i>Closed / critical</span>
+          <span><i class="lg lg-pipe"></i>Bypass pipeline</span>
+        </div>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <div class="panel choke-panel">
+      <div class="panel-head">
+        <h2>Strait Status <span class="vs">vs. pre-crisis norm</span><span class="vs" id="chokeAsOf"></span></h2>
+      </div>
+      <div id="chokeList" class="choke-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== Secondary panels ===== -->
+  <section class="panel-grid">
+    <div class="panel" id="insurancePanel">
+      <div class="panel-head"><h2>War-Risk Insurance</h2></div>
+      <div id="insuranceBody" class="panel-body"></div>
+    </div>
+
+    <div class="panel" id="tradePanel">
+      <div class="panel-head"><h2>Trade at Risk</h2></div>
+      <div id="tradeBody" class="panel-body"></div>
+    </div>
+
+    <div class="panel" id="reroutePanel">
+      <div class="panel-head"><h2>Bypass &amp; Reroute</h2></div>
+      <div id="rerouteBody" class="panel-body"></div>
+    </div>
+
+    <div class="panel" id="carrierPanel">
+      <div class="panel-head"><h2>Carrier Posture</h2></div>
+      <div id="carrierBody" class="panel-body"></div>
+    </div>
+
+    <div class="panel" id="marketPanel">
+      <div class="panel-head"><h2>Escalation Odds <span class="vs">prediction markets</span></h2></div>
+      <div id="marketBody" class="panel-body"></div>
+    </div>
+
+    <div class="panel" id="eventPanel">
+      <div class="panel-head"><h2>Live Event Feed</h2></div>
+      <div id="eventBody" class="panel-body event-body"></div>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <div id="sourceLine">
+      Data: <a href="https://straits.live" target="_blank" rel="noopener">straits.live</a>
+      aggregating IMF PortWatch · EIA · Lloyd's Joint War Committee · Kalshi/Polymarket.
+    </div>
+    <div class="disclaimer">
+      Indicators are estimates for situational awareness, not navigational or trading advice.
+      "Pre-crisis norm" is a curated baseline of daily transit calls for the steady state just before the
+      Feb 2026 Hormuz crisis (Hormuz ~94, Suez ~40, Bab el-Mandeb ~35, Malacca ~225, Cape ~90) from IMF
+      PortWatch / Suez Canal Authority / EIA. For Suez, Bab el-Mandeb and the Cape this is the recent
+      Houthi-era normal, so their % reflects the Hormuz crisis on top of the earlier Red Sea disruption.
+      Transit counts are the latest reported COMPLETE day from IMF PortWatch (updated ~weekly, so the
+      "as of" date typically lags several days); if the newest day is still provisional, the previous
+      complete day is shown. AIS-derived counts may be affected by GPS jamming and dark activity.
+    </div>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
