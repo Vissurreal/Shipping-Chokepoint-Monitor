@@ -8,6 +8,7 @@
 
 const STATUS_URL = 'https://straits.live/status';
 const CHOKE_URL = 'https://straits.live/api/v1/chokepoints';
+const EVENTS_URL = 'https://straits.live/api/v1/events';
 const REFRESH_MS = 90 * 1000;
 
 async function fetchJson(url, ms = 12000) {
@@ -778,14 +779,16 @@ function renderEvents(d) {
   if (!events.length) { b.innerHTML = '<div class="kpi-sub">No recent events.</div>'; return; }
   events.forEach(e => {
     const sev = ['critical', 'serious', 'warning', 'good'].includes((e.severity || '').toLowerCase()) ? e.severity.toLowerCase() : SEV.warning;
+    const sourceUrl = /^https?:\/\//i.test(e.sourceUrl || '') ? e.sourceUrl : '';
+    const tag = sourceUrl ? 'a' : 'div';
     b.appendChild(el(`
-      <div class="ev sev-${sev}">
+      <${tag} class="ev sev-${sev}"${sourceUrl ? ` href="${esc(sourceUrl)}" target="_blank" rel="noopener noreferrer"` : ''}>
         <div class="ev-rail"></div>
         <div>
           <div class="ev-title">${esc(e.title)}</div>
-          <div class="ev-meta"><span class="ev-type c-${sev}">${esc(e.type || 'update')}</span><span>${timeAgo(e.occurredAt)}</span></div>
+          <div class="ev-meta"><span class="ev-type c-${sev}">${esc(e.type || 'update')}</span><span>${timeAgo(e.occurredAt)}</span><span>${esc(e.sourceName || '')}</span></div>
         </div>
-      </div>`));
+      </${tag}>`));
   });
 }
 
@@ -812,12 +815,14 @@ async function load() {
   btn.classList.add('spin');
   let isLive = false, data = FALLBACK;
   try {
-    const [status, choke] = await Promise.all([
+    const [status, choke, eventData] = await Promise.all([
       fetchJson(STATUS_URL),
       fetchJson(CHOKE_URL).catch(() => null),   // enrichment; non-fatal
+      fetchJson(EVENTS_URL).catch(() => null), // source links; non-fatal
     ]);
     data = status;
     mergeChokepoints(data, choke);
+    if (eventData?.events) data.events = eventData.events;
     isLive = true;
   } catch (err) {
     console.warn('Live fetch failed, using cached snapshot:', err.message);
