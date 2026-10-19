@@ -1,1 +1,5 @@
 .claude/settings.local.json
+
+# Cross-vendor handoff files (see ~/.claude/CLAUDE.md section 3.4)
+.agents/handoff/
+.agents/reports/
